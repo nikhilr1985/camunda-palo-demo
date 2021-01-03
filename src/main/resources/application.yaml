@@ -1,0 +1,9 @@
+camunda:
+  bpm:
+    admin-user:
+      id: admin
+      password: admin
+      firstName: Administrator
+    filter:
+      create: All tasks
+    default-serialization-format: "application/json"

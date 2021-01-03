@@ -1,0 +1,27 @@
+<form role="form" name="form">
+    <script cam-script type="text/form-script">
+        var variableManager = camForm.variableManager;
+        camForm.on('form-loaded', function () {
+            variableManager.fetchVariable('userInfo');
+        });
+        camForm.on('variables-fetched', function () {
+            $scope.userInfo = variableManager.variableValue('userInfo');
+        });
+    </script>
+    <div>
+        <table>
+            <tr>
+                <td>Username : </td>
+                <td>{{userInfo.userName}}</td>
+            </tr>
+            <tr>
+                <td>First Name : </td>
+                <td>{{userInfo.firstName}}</td>
+            </tr>
+            <tr>
+                <td>Last Name : </td>
+                <td>{{userInfo.lastName}}</td>
+            </tr>
+        </table>
+    </div>
+</form>
