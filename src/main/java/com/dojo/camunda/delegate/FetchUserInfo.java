@@ -12,7 +12,7 @@ import java.util.Map;
 public class FetchUserInfo implements JavaDelegate {
     @Override
     public void execute(DelegateExecution delegateExecution) throws Exception {
-        Map<String, UserInfo> userList = new HashMap<String, UserInfo>();
+        Map userList = new HashMap<String, UserInfo>();
         userList.put("user1", new UserInfo("user1", "John", "Doe"));
         userList.put("user2", new UserInfo("user2", "Brad", "Pitt"));
         userList.put("user3", new UserInfo("user3", "Tom", "Hanks"));
@@ -22,7 +22,12 @@ public class FetchUserInfo implements JavaDelegate {
 
         String userName = delegateExecution.getBusinessKey();
 
-//        delegateExecution.setVariable("userInfo", Variables.objectValue(userList.get(userName)).serializationDataFormat("application/json").create());
-        delegateExecution.setVariable("userInfo", userList.get(userName));
+        UserInfo info;
+        if(userList.containsKey(userName)){
+            info = (UserInfo) userList.get(userName);
+        }else{
+            throw new Exception("User does not exist");
+        }
+        delegateExecution.setVariable("userInfo", info);
     }
 }

@@ -8,7 +8,7 @@
       <bpmn:outgoing>Flow_1fe4lg7</bpmn:outgoing>
       <bpmn:outgoing>Flow_0687rnd</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sendTask id="Activity_0a95vll" name="Send account already exists message" camunda:type="external" camunda:topic="SendEmailTopic">
+    <bpmn:sendTask id="Activity_0a95vll" name="Send account already exists message" camunda:type="external" camunda:topic="SendAsynchronousEmailTopic">
       <bpmn:incoming>Flow_1fe4lg7</bpmn:incoming>
       <bpmn:outgoing>Flow_1dzd143</bpmn:outgoing>
     </bpmn:sendTask>
@@ -30,36 +30,36 @@
       <bpmn:incoming>Flow_1dzd143</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:dataStoreReference id="DataStoreReference_0iwpugo" />
-    <bpmn:startEvent id="Event_0tgj50p" name="Create new user account">
+    <bpmn:startEvent id="Event_0tgj50p" name="Create new user account" camunda:asyncBefore="true">
       <bpmn:outgoing>Flow_12eipqe</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:userTask id="Activity_18whhpp" name="Approve Application" camunda:formKey="embedded:app:forms/approval.html" camunda:candidateGroups="test">
-      <bpmn:documentation>Please appr</bpmn:documentation>
+    <bpmn:userTask id="Activity_18whhpp" name="Review Application" camunda:formKey="embedded:app:forms/approval.html" camunda:candidateGroups="approver">
+      <bpmn:documentation>Please review the application before approving</bpmn:documentation>
       <bpmn:incoming>Flow_0687rnd</bpmn:incoming>
       <bpmn:outgoing>Flow_1dvrfto</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:sequenceFlow id="Flow_12eipqe" sourceRef="Event_0tgj50p" targetRef="Activity_1bentfa" />
-    <bpmn:sequenceFlow id="Flow_1mikc2q" sourceRef="Activity_1bentfa" targetRef="Activity_1wtybrq" />
-    <bpmn:sequenceFlow id="Flow_1fe4lg7" name="Yes" sourceRef="Gateway_0uc8imk" targetRef="Activity_0a95vll">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${accountExists==true}</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0687rnd" name="No" sourceRef="Gateway_0uc8imk" targetRef="Activity_18whhpp">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${accountExists==false}</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_1dzd143" sourceRef="Activity_0a95vll" targetRef="Event_043wwhx" />
-    <bpmn:sequenceFlow id="Flow_1dvrfto" sourceRef="Activity_18whhpp" targetRef="Activity_09pk0yi" />
-    <bpmn:sequenceFlow id="Flow_0wswbnj" sourceRef="Activity_09pk0yi" targetRef="Activity_1uig2p1" />
-    <bpmn:sequenceFlow id="Flow_19uclxf" sourceRef="Activity_1uig2p1" targetRef="Event_0jluujd" />
     <bpmn:serviceTask id="Activity_1bentfa" name="Check If User Account Exists" camunda:delegateExpression="${userAccountExists}">
       <bpmn:documentation>Check if Account Exists</bpmn:documentation>
       <bpmn:incoming>Flow_12eipqe</bpmn:incoming>
       <bpmn:outgoing>Flow_1mikc2q</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_09sw4vb" sourceRef="Activity_1wtybrq" targetRef="Gateway_0uc8imk" />
     <bpmn:serviceTask id="Activity_1wtybrq" name="Fetch User Info" camunda:delegateExpression="${fetchUserInfo}">
       <bpmn:incoming>Flow_1mikc2q</bpmn:incoming>
       <bpmn:outgoing>Flow_09sw4vb</bpmn:outgoing>
     </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_09sw4vb" sourceRef="Activity_1wtybrq" targetRef="Gateway_0uc8imk" />
+    <bpmn:sequenceFlow id="Flow_19uclxf" sourceRef="Activity_1uig2p1" targetRef="Event_0jluujd" />
+    <bpmn:sequenceFlow id="Flow_0wswbnj" sourceRef="Activity_09pk0yi" targetRef="Activity_1uig2p1" />
+    <bpmn:sequenceFlow id="Flow_1dvrfto" sourceRef="Activity_18whhpp" targetRef="Activity_09pk0yi" />
+    <bpmn:sequenceFlow id="Flow_1dzd143" sourceRef="Activity_0a95vll" targetRef="Event_043wwhx" />
+    <bpmn:sequenceFlow id="Flow_0687rnd" name="No" sourceRef="Gateway_0uc8imk" targetRef="Activity_18whhpp">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${accountExists==false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1fe4lg7" name="Yes" sourceRef="Gateway_0uc8imk" targetRef="Activity_0a95vll">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${accountExists==true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1mikc2q" sourceRef="Activity_1bentfa" targetRef="Activity_1wtybrq" />
+    <bpmn:sequenceFlow id="Flow_12eipqe" sourceRef="Event_0tgj50p" targetRef="Activity_1bentfa" />
     <bpmn:textAnnotation id="TextAnnotation_0k5bf7r">
       <bpmn:text>Write to database</bpmn:text>
     </bpmn:textAnnotation>
@@ -67,9 +67,10 @@
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="createAccount">
-      <bpmndi:BPMNShape id="TextAnnotation_0k5bf7r_di" bpmnElement="TextAnnotation_0k5bf7r">
-        <dc:Bounds x="916" y="80" width="100" height="40" />
-      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_09sw4vb_di" bpmnElement="Flow_09sw4vb">
+        <di:waypoint x="490" y="450" />
+        <di:waypoint x="535" y="450" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_19uclxf_di" bpmnElement="Flow_19uclxf">
         <di:waypoint x="1080" y="340" />
         <di:waypoint x="1172" y="340" />
@@ -110,10 +111,6 @@
         <di:waypoint x="218" y="450" />
         <di:waypoint x="250" y="450" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_09sw4vb_di" bpmnElement="Flow_09sw4vb">
-        <di:waypoint x="490" y="450" />
-        <di:waypoint x="535" y="450" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Gateway_0uc8imk_di" bpmnElement="Gateway_0uc8imk" isMarkerVisible="true">
         <dc:Bounds x="535" y="425" width="50" height="50" />
         <bpmndi:BPMNLabel>
@@ -144,14 +141,14 @@
       <bpmndi:BPMNShape id="DataStoreReference_0iwpugo_di" bpmnElement="DataStoreReference_0iwpugo">
         <dc:Bounds x="865" y="165" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_18whhpp_di" bpmnElement="Activity_18whhpp">
-        <dc:Bounds x="640" y="300" width="100" height="80" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0tgj50p_di" bpmnElement="Event_0tgj50p">
         <dc:Bounds x="182" y="432" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="160" y="475" width="81" height="27" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_18whhpp_di" bpmnElement="Activity_18whhpp">
+        <dc:Bounds x="640" y="300" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0b1aksa_di" bpmnElement="Activity_1bentfa">
         <dc:Bounds x="250" y="410" width="100" height="80" />
@@ -159,13 +156,16 @@
       <bpmndi:BPMNShape id="Activity_0sosy2a_di" bpmnElement="Activity_1wtybrq">
         <dc:Bounds x="390" y="410" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Association_0krf7tx_di" bpmnElement="Association_0krf7tx">
-        <di:waypoint x="910" y="165" />
-        <di:waypoint x="946" y="120" />
-      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_0k5bf7r_di" bpmnElement="TextAnnotation_0k5bf7r">
+        <dc:Bounds x="916" y="80" width="100" height="40" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataOutputAssociation_1fzjfvg_di" bpmnElement="DataOutputAssociation_1fzjfvg">
         <di:waypoint x="869" y="300" />
         <di:waypoint x="884" y="215" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0krf7tx_di" bpmnElement="Association_0krf7tx">
+        <di:waypoint x="910" y="165" />
+        <di:waypoint x="946" y="120" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
